@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+
+
+from sklearn.metrics import (precision_recall_curve, 
+                            average_precision_score,
+                            roc_curve,
+                            roc_auc_score, 
+                            ConfusionMatrixDisplay,
+                            classification_report)
+
+
+
+data = "Include your Dataset"
+X, y = data.data, data.target
+
+print("Dataset:", data.DESCR.splitlines()[0])
+print(data.DESCR)
+print("X shape:", X.shape)
+print("True Positivive class meaning:", data.target_names[0])
+print("False Positivive class meaning:", data.target_names[1])
+#print(X[:5])
+
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.25, random_state=42, stratify = y)
+
+model = Pipeline([
+    ("scaler", StandardScaler()),
+    ("clf" , LogisticRegression(max_iter = 5000, random_state=42))
+])
+model.fit(X_train, y_train)
+
+
+y_scores= model.predict_proba(X_test)[:, 1]
+y_pred = model.predict(X_test)
+
+print(classification_report(y_test, y_pred, target_names = data.target_names))
+ConfusionMatrixDisplay.from_predictions(y_test, y_pred, display_labels= data.target_names)
+plt.title("Confusion Matrix")
+plt.show()
+
+precision, recall, _ = precision_recall_curve(y_test, y_scores)
+ap = average_precision_score(y_test, y_scores)
+
+plt.figure()
+plt.plot(recall, precision, marker=".")
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title(f"Precision–Recall Curve (AP = {ap:.3f})")
+plt.grid(True)
+plt.savefig("precision_recall_curve.png", dpi=200, bbox_inches="tight")
+plt.show()
+
+print("Average Precision (AP):", ap)
+
+fpr, tpr, _ = roc_curve(y_test, y_scores)
+auc = roc_auc_score(y_test, y_scores)
+
+plt.figure()
+plt.plot(fpr, tpr, marker=".")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title(f"ROC Curve (AUC = {auc:.3f})")
+plt.grid(True)
+plt.savefig("roc_curve.png", dpi=200, bbox_inches="tight")
+plt.show()
+
+print("ROC AUC:", auc)
