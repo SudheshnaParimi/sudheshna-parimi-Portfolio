@@ -1,3 +1,6 @@
+#This project is building a breast cancer classifier using Logistic Regression in Scikit-learn. The goal is to train a model that can look at the medical features in the given dataset and predict wheather a tumor is of the two classes in the dataset.
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
